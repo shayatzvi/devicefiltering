@@ -3,7 +3,6 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, si
 import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // --- IMPORTANT: REPLACE WITH YOUR FIREBASE CONFIG ---
-// This is where you will paste the code from your Firebase console.
 const firebaseConfig = {
     apiKey: "AIzaSyBCDun9-yoZvZDWMwqqJIv4Txmxb2pNmSw",
     authDomain: "jabadrents.firebaseapp.com",
@@ -39,9 +38,9 @@ const adminLogoutBtn = document.getElementById('admin-logout-btn');
 const schoolAdminLogoutBtn = document.getElementById('school-admin-logout-btn');
 const userLogoutBtn = document.getElementById('user-logout-btn');
 
+const schoolList = document.getElementById('school-list');
 const userList = document.getElementById('user-list');
 const deviceList = document.getElementById('device-list');
-const schoolList = document.getElementById('school-list');
 const schoolAdminTitle = document.getElementById('school-admin-title');
 const deviceFormLink = document.getElementById('device-form-link');
 const schoolUserList = document.getElementById('school-user-list');
@@ -56,7 +55,7 @@ const closeSchoolModalBtn = document.getElementById('close-school-modal');
 const schoolForm = document.getElementById('school-form');
 const schoolNameInput = document.getElementById('school-name-input');
 const schoolAdminEmailInput = document.getElementById('school-admin-email');
-const schoolAdminPasswordInput = document.getElementById('school-admin-password');
+const schoolAdminPasswordInput = document = document.getElementById('school-admin-password');
 const schoolFormMessage = document.getElementById('school-form-message');
 const publicDeviceForm = document.getElementById('public-device-form');
 const publicDeviceNameInput = document.getElementById('public-device-name');
@@ -65,8 +64,26 @@ const publicFormTitle = document.getElementById('public-form-title');
 const publicFormMessage = document.getElementById('public-form-message');
 const goHomeBtn = document.getElementById('go-home-btn');
 
-// --- State Variables ---
+const editModal = document.getElementById('edit-modal');
+const closeEditModalBtn = document.getElementById('close-edit-modal');
+const editForm = document.getElementById('edit-form');
+const editModalTitle = document.getElementById('edit-modal-title');
+const editFields = document.getElementById('edit-fields');
+const editFormMessage = document.getElementById('edit-form-message');
+
+const schoolSearchInput = document.getElementById('school-search');
+const userSearchInput = document.getElementById('user-search');
+const deviceSearchInput = document.getElementById('device-search');
+const schoolUserSearchInput = document.getElementById('school-user-search');
+const schoolDeviceSearchInput = document.getElementById('school-device-search');
+const myDeviceSearchInput = document.getElementById('my-device-search');
+
+// --- Global State ---
+let allSchools = [];
+let allUsers = [];
+let allDevices = [];
 let isLogin = true;
+let currentUserData = null;
 
 // --- Helper Functions ---
 function showLoading(show) {
@@ -86,62 +103,27 @@ function getQueryParams() {
     return Object.fromEntries(params.entries());
 }
 
-function setupListeners() {
+// --- Dynamic Table and Modal Logic ---
+function setupListeners(userRole) {
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', async (e) => {
             const id = e.target.dataset.id;
             const type = e.target.dataset.type;
             if (confirm(`Are you sure you want to delete this ${type}?`)) {
-                try {
-                    const batch = writeBatch(db);
-                    
-                    if (type === 'schools') {
-                        // Get all users and devices associated with the school
-                        const usersQuery = query(collection(db, "users"), where("schoolId", "==", id));
-                        const devicesQuery = query(collection(db, "devices"), where("schoolId", "==", id));
-                        const [usersSnapshot, devicesSnapshot] = await Promise.all([getDocs(usersQuery), getDocs(devicesQuery)]);
-                        
-                        // Delete all associated users and devices in a batch
-                        usersSnapshot.forEach(userDoc => batch.delete(userDoc.ref));
-                        devicesSnapshot.forEach(deviceDoc => batch.delete(deviceDoc.ref));
-                        
-                        // Delete the school itself
-                        batch.delete(doc(db, "schools", id));
-
-                    } else if (type === 'users') {
-                        // Get all devices owned by the user
-                        const devicesQuery = query(collection(db, "devices"), where("ownerId", "==", id));
-                        const devicesSnapshot = await getDocs(devicesQuery);
-
-                        // Delete all associated devices
-                        devicesSnapshot.forEach(deviceDoc => batch.delete(deviceDoc.ref));
-
-                        // Delete the user
-                        batch.delete(doc(db, "users", id));
-
-                    } else if (type === 'devices' || type === 'my-devices') {
-                        // Find the user associated with the device and update their document
-                        const usersQuery = query(collection(db, "users"), where("associatedDeviceIds", "array-contains", id));
-                        const usersSnapshot = await getDocs(usersQuery);
-                        if (!usersSnapshot.empty) {
-                            const userDocRef = usersSnapshot.docs[0].ref;
-                            const newDeviceIds = usersSnapshot.docs[0].data().associatedDeviceIds.filter(deviceId => deviceId !== id);
-                            batch.update(userDocRef, { associatedDeviceIds: newDeviceIds });
-                        }
-                        
-                        // Delete the device
-                        batch.delete(doc(db, "devices", id));
-                    }
-                    
-                    await batch.commit();
-                    await refreshDashboard();
-                } catch (error) {
-                    console.error("Error deleting item:", error);
-                    alert("Failed to delete. Please try again.");
-                }
+                await deleteItem(id, type);
             }
         });
     });
+
+    if (userRole === 'admin' || userRole === 'school-admin') {
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const id = e.target.dataset.id;
+                const type = e.target.dataset.type;
+                await openEditModal(id, type);
+            });
+        });
+    }
 
     document.querySelectorAll('.status-select').forEach(select => {
         select.addEventListener('change', async (e) => {
@@ -156,40 +138,184 @@ function setupListeners() {
     });
 }
 
-// --- Dynamic Table Creation ---
-function createTableHTML(data, type, currentUserId) {
+async function deleteItem(id, type) {
+    showLoading(true);
+    try {
+        const batch = writeBatch(db);
+        
+        if (type === 'schools') {
+            const schoolRef = doc(db, "schools", id);
+            const usersQuery = query(collection(db, "users"), where("schoolId", "==", id));
+            const devicesQuery = query(collection(db, "devices"), where("schoolId", "==", id));
+            const [usersSnapshot, devicesSnapshot] = await Promise.all([getDocs(usersQuery), getDocs(devicesQuery)]);
+            
+            usersSnapshot.forEach(userDoc => batch.delete(userDoc.ref));
+            devicesSnapshot.forEach(deviceDoc => batch.delete(deviceDoc.ref));
+            batch.delete(schoolRef);
+
+        } else if (type === 'users' || type === 'school-users') {
+            const userRef = doc(db, "users", id);
+            const devicesQuery = query(collection(db, "devices"), where("ownerId", "==", id));
+            const devicesSnapshot = await getDocs(devicesQuery);
+            devicesSnapshot.forEach(deviceDoc => batch.delete(deviceDoc.ref));
+            batch.delete(userRef);
+
+        } else if (type === 'devices' || type === 'school-devices' || type === 'my-devices') {
+            const deviceRef = doc(db, "devices", id);
+            batch.delete(deviceRef);
+        }
+        
+        await batch.commit();
+        alert("Item successfully deleted.");
+    } catch (error) {
+        console.error("Error deleting item:", error);
+        alert("Failed to delete. Please try again.");
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function openEditModal(id, type) {
+    editFormMessage.textContent = '';
+    editForm.dataset.id = id;
+    editForm.dataset.type = type;
+    editFields.innerHTML = '';
+    
+    let itemData;
+    let fieldsHtml = '';
+
+    switch(type) {
+        case 'schools':
+            itemData = allSchools.find(s => s.id === id);
+            editModalTitle.textContent = 'Edit School';
+            fieldsHtml = `
+                <div>
+                    <label for="edit-school-name" class="block text-sm font-medium text-gray-700">School Name</label>
+                    <input type="text" id="edit-school-name" value="${itemData.name}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                </div>
+            `;
+            break;
+        case 'users':
+        case 'school-users':
+            itemData = allUsers.find(u => u.id === id);
+            editModalTitle.textContent = 'Edit User';
+            fieldsHtml = `
+                <div>
+                    <label for="edit-user-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="edit-user-email" value="${itemData.email}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div>
+                    <label for="edit-user-role" class="block text-sm font-medium text-gray-700">Role</label>
+                    <select id="edit-user-role" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <option value="user" ${itemData.role === 'user' ? 'selected' : ''}>User</option>
+                        <option value="school-admin" ${itemData.role === 'school-admin' ? 'selected' : ''}>School Admin</option>
+                        <option value="admin" ${itemData.role === 'admin' ? 'selected' : ''}>System Admin</option>
+                    </select>
+                </div>
+            `;
+            break;
+        case 'devices':
+        case 'school-devices':
+        case 'my-devices':
+            itemData = allDevices.find(d => d.id === id);
+            editModalTitle.textContent = 'Edit Device';
+            fieldsHtml = `
+                <div>
+                    <label for="edit-device-name" class="block text-sm font-medium text-gray-700">Device Name</label>
+                    <input type="text" id="edit-device-name" value="${itemData.name}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div>
+                    <label for="edit-device-status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select id="edit-device-status" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <option value="online" ${itemData.status === 'online' ? 'selected' : ''}>Online</option>
+                        <option value="offline" ${itemData.status === 'offline' ? 'selected' : ''}>Offline</option>
+                    </select>
+                </div>
+            `;
+            break;
+    }
+
+    editFields.innerHTML = fieldsHtml;
+    editModal.classList.remove('hidden');
+}
+
+editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    showLoading(true);
+    editFormMessage.textContent = '';
+    const id = editForm.dataset.id;
+    const type = editForm.dataset.type;
+
+    try {
+        if (type === 'schools') {
+            const name = document.getElementById('edit-school-name').value;
+            await updateDoc(doc(db, 'schools', id), { name });
+        } else if (type.includes('user')) {
+            const email = document.getElementById('edit-user-email').value;
+            const role = document.getElementById('edit-user-role').value;
+            await updateDoc(doc(db, 'users', id), { email, role });
+        } else if (type.includes('device')) {
+            const name = document.getElementById('edit-device-name').value;
+            const status = document.getElementById('edit-device-status').value;
+            await updateDoc(doc(db, 'devices', id), { name, status });
+        }
+        editModal.classList.add('hidden');
+        alert("Changes saved successfully.");
+    } catch (error) {
+        console.error("Error saving changes:", error);
+        editFormMessage.textContent = "Failed to save changes. " + error.message;
+    } finally {
+        showLoading(false);
+    }
+});
+
+closeEditModalBtn.addEventListener('click', () => {
+    editModal.classList.add('hidden');
+    editForm.reset();
+});
+
+function createTableHTML(data, type, currentUserId, userRole, searchTerm) {
     if (!data || data.length === 0) {
         return `<p class="text-gray-500">No ${type} found.</p>`;
     }
     
     let headers;
     let getRowData;
+    let filteredData = data;
+    const isSearchable = searchTerm && searchTerm.trim() !== '';
 
     switch (type) {
         case 'users':
         case 'school-users':
             headers = ['Email', 'Role'];
-            getRowData = (item) => [item.email, item.role.replace('-', ' ')];
+            getRowData = async (item) => [item.email, item.role.replace('-', ' ')];
+            if (isSearchable) {
+                filteredData = data.filter(item => item.email.toLowerCase().includes(searchTerm.toLowerCase()));
+            }
             break;
         case 'schools':
             headers = ['Name', 'Admin Email'];
             getRowData = async (item) => {
-                const adminDoc = await getDoc(doc(db, "users", item.adminUserId));
-                return [item.name, adminDoc.exists() ? adminDoc.data().email : 'N/A'];
+                const adminUser = allUsers.find(u => u.id === item.adminUserId);
+                return [item.name, adminUser ? adminUser.email : 'N/A'];
             };
+            if (isSearchable) {
+                filteredData = data.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            }
             break;
         case 'devices':
         case 'school-devices':
-            headers = ['Name', 'Owner Email', 'Status'];
-            getRowData = async (item) => {
-                const ownerDoc = await getDoc(doc(db, "users", item.ownerId));
-                const ownerEmail = ownerDoc.exists() ? ownerDoc.data().email : 'N/A';
-                return [item.name, ownerEmail, item.status];
-            };
-            break;
         case 'my-devices':
-            headers = ['Name', 'Status'];
-            getRowData = (item) => [item.name, item.status];
+            headers = ['Name', 'Owner Email', 'Status'];
+            if (type === 'my-devices') headers = ['Name', 'Status'];
+            getRowData = async (item) => {
+                const ownerUser = allUsers.find(u => u.id === item.ownerId);
+                const ownerEmail = ownerUser ? ownerUser.email : 'N/A';
+                return type === 'my-devices' ? [item.name, item.status] : [item.name, ownerEmail, item.status];
+            };
+            if (isSearchable) {
+                filteredData = data.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            }
             break;
         default:
             return '';
@@ -199,24 +325,25 @@ function createTableHTML(data, type, currentUserId) {
     
     let rowsHtml = '';
     
-    // Using a promise-based approach to resolve owner emails
-    const promises = data.map(async (item) => {
+    const promises = filteredData.map(async (item) => {
         const rowData = await getRowData(item);
         const cellsHtml = rowData.map(cell => {
-            if (cell === 'online' || cell === 'offline') {
-                const statusColor = cell === 'online' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-                return `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><span class="py-1 px-3 text-xs font-semibold rounded-full ${statusColor}">${cell}</span></td>`;
-            }
-            return `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cell}</td>`;
+            const isStatus = cell === 'online' || cell === 'offline';
+            const statusColor = isStatus ? (cell === 'online' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700') : '';
+            return `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><span class="py-1 px-3 text-xs font-semibold rounded-full ${statusColor}">${isStatus ? cell : cell}</span></td>`;
         }).join('');
 
-        const isDeletable = type !== 'my-devices' && (item.id !== currentUserId);
-        const deleteButton = isDeletable ? `<button data-id="${item.id}" data-type="${type === 'school-users' ? 'users' : type === 'school-devices' ? 'devices' : type}" class="delete-btn text-red-600 hover:text-red-900 transition-colors">Delete</button>` : '';
+        const isDeletable = type !== 'my-devices' && item.id !== currentUserId;
+        const deleteButton = isDeletable ? `<button data-id="${item.id}" data-type="${type}" class="delete-btn text-red-600 hover:text-red-900 transition-colors">Delete</button>` : '';
         
+        const isEditable = (userRole === 'admin' || userRole === 'school-admin') && type !== 'my-devices';
+        const editButton = isEditable ? `<button data-id="${item.id}" data-type="${type}" class="edit-btn text-blue-600 hover:text-blue-900 transition-colors ml-4">Edit</button>` : '';
+
         return `
             <tr class="hover:bg-gray-50">
                 ${cellsHtml}
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    ${editButton}
                     ${deleteButton}
                 </td>
             </tr>
@@ -243,94 +370,101 @@ function createTableHTML(data, type, currentUserId) {
     });
 }
 
-// --- Rendering Functions ---
-async function renderSystemUsers(users, adminId) {
-    const usersWithoutAdmin = users.filter(u => u.id !== adminId);
-    userList.innerHTML = await createTableHTML(usersWithoutAdmin, 'users', adminId);
-    setupListeners();
-}
+function renderContent() {
+    if (currentUserData) {
+        const userRole = currentUserData.role;
+        const currentUserId = auth.currentUser.uid;
+        const schoolId = currentUserData.schoolId;
 
-async function renderSystemSchools(schools) {
-    schoolList.innerHTML = await createTableHTML(schools, 'schools', null);
-    setupListeners();
-}
-
-async function renderSystemDevices(devices) {
-    deviceList.innerHTML = await createTableHTML(devices, 'devices', null);
-    setupListeners();
-}
-
-async function renderSchoolUsers(users, schoolAdminId) {
-    const usersWithoutAdmin = users.filter(u => u.id !== schoolAdminId);
-    schoolUserList.innerHTML = await createTableHTML(usersWithoutAdmin, 'school-users', schoolAdminId);
-    setupListeners();
-}
-
-async function renderSchoolDevices(devices) {
-    schoolDeviceList.innerHTML = await createTableHTML(devices, 'school-devices', null);
-    setupListeners();
-}
-
-async function renderMyDevices(devices) {
-    myDeviceList.innerHTML = await createTableHTML(devices, 'my-devices', auth.currentUser.uid);
-    setupListeners();
+        if (userRole === 'admin') {
+            const searchTerm = schoolSearchInput.value;
+            createTableHTML(allSchools, 'schools', currentUserId, userRole, searchTerm).then(html => {
+                schoolList.innerHTML = html;
+                setupListeners(userRole);
+            });
+            const userSearchTerm = userSearchInput.value;
+            const usersWithoutAdmin = allUsers.filter(u => u.id !== currentUserId);
+            createTableHTML(usersWithoutAdmin, 'users', currentUserId, userRole, userSearchTerm).then(html => {
+                userList.innerHTML = html;
+                setupListeners(userRole);
+            });
+            const deviceSearchTerm = deviceSearchInput.value;
+            createTableHTML(allDevices, 'devices', currentUserId, userRole, deviceSearchTerm).then(html => {
+                deviceList.innerHTML = html;
+                setupListeners(userRole);
+            });
+        } else if (userRole === 'school-admin') {
+            const schoolUsers = allUsers.filter(u => u.schoolId === schoolId);
+            const usersWithoutAdmin = schoolUsers.filter(u => u.id !== currentUserId);
+            const userSearchTerm = schoolUserSearchInput.value;
+            createTableHTML(usersWithoutAdmin, 'school-users', currentUserId, userRole, userSearchTerm).then(html => {
+                schoolUserList.innerHTML = html;
+                setupListeners(userRole);
+            });
+            const schoolDevices = allDevices.filter(d => d.schoolId === schoolId);
+            const deviceSearchTerm = schoolDeviceSearchInput.value;
+            createTableHTML(schoolDevices, 'school-devices', currentUserId, userRole, deviceSearchTerm).then(html => {
+                schoolDeviceList.innerHTML = html;
+                setupListeners(userRole);
+            });
+        } else {
+            const myDevices = allDevices.filter(d => d.ownerId === currentUserId);
+            const deviceSearchTerm = myDeviceSearchInput.value;
+            createTableHTML(myDevices, 'my-devices', currentUserId, userRole, deviceSearchTerm).then(html => {
+                myDeviceList.innerHTML = html;
+                setupListeners(userRole);
+            });
+        }
+    }
 }
 
 // --- Dashboard Setup Functions ---
-function setupSystemAdminDashboard(adminId) {
-    onSnapshot(collection(db, "users"), (snapshot) => {
-        const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderSystemUsers(users, adminId);
-    });
-
-    onSnapshot(collection(db, "devices"), (snapshot) => {
-        const devices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderSystemDevices(devices);
-    });
-    
+function setupSystemAdminDashboard(userId) {
+    showView('admin-dashboard');
+    schoolSearchInput.addEventListener('input', renderContent);
+    userSearchInput.addEventListener('input', renderContent);
+    deviceSearchInput.addEventListener('input', renderContent);
     onSnapshot(collection(db, "schools"), (snapshot) => {
-        const schools = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderSystemSchools(schools);
+        allSchools = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderContent();
+    });
+    onSnapshot(collection(db, "users"), (snapshot) => {
+        allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderContent();
+    });
+    onSnapshot(collection(db, "devices"), (snapshot) => {
+        allDevices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderContent();
     });
 }
  
-function setupSchoolAdminDashboard(schoolAdminId, schoolId, userData) {
-    schoolAdminTitle.textContent = `${userData.schoolName} Admin Dashboard`;
+function setupSchoolAdminDashboard(schoolId) {
+    schoolAdminTitle.textContent = `${currentUserData.schoolName} Admin Dashboard`;
     deviceFormLink.textContent = `${window.location.origin}${window.location.pathname}?schoolId=${schoolId}`;
-    
-    const usersQuery = query(collection(db, "users"), where("schoolId", "==", schoolId));
-    onSnapshot(usersQuery, (snapshot) => {
-        const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderSchoolUsers(users, schoolAdminId);
+    showView('school-admin-dashboard');
+    schoolUserSearchInput.addEventListener('input', renderContent);
+    schoolDeviceSearchInput.addEventListener('input', renderContent);
+
+    onSnapshot(collection(db, "users"), (snapshot) => {
+        allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderContent();
     });
-    
-    const devicesQuery = query(collection(db, "devices"), where("schoolId", "==", schoolId));
-    onSnapshot(devicesQuery, (snapshot) => {
-        const devices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderSchoolDevices(devices);
+    onSnapshot(collection(db, "devices"), (snapshot) => {
+        allDevices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderContent();
     });
 }
 
-function setupUserDashboard(currentUserId, userData) {
-    userEmailDisplay.textContent = `Email: ${userData.email}`;
-    userRoleDisplay.textContent = `Role: ${userData.role}`;
-    
-    if (userData.schoolId) {
-        onSnapshot(doc(db, "schools", userData.schoolId), (schoolDoc) => {
-            if (schoolDoc.exists()) {
-                userSchoolDisplay.textContent = `School: ${schoolDoc.data().name}`;
-            } else {
-                userSchoolDisplay.textContent = `School: N/A`;
-            }
-        });
-    } else {
-        userSchoolDisplay.textContent = `School: N/A`;
-    }
+function setupUserDashboard(userId) {
+    userEmailDisplay.textContent = `Email: ${currentUserData.email}`;
+    userRoleDisplay.textContent = `Role: ${currentUserData.role}`;
+    userSchoolDisplay.textContent = `School: ${currentUserData.schoolName || 'N/A'}`;
+    showView('user-dashboard');
+    myDeviceSearchInput.addEventListener('input', renderContent);
 
-    const devicesQuery = query(collection(db, "devices"), where("ownerId", "==", currentUserId));
-    onSnapshot(devicesQuery, (snapshot) => {
-        const devices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderMyDevices(devices);
+    onSnapshot(collection(db, "devices"), (snapshot) => {
+        allDevices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderContent();
     });
 }
 
@@ -402,38 +536,38 @@ window.onload = async function() {
                 publicFormTitle.textContent = `Device Registration for ${schoolDoc.data().name}`;
                 setupPublicDeviceForm(params.schoolId);
                 showView('public-device-form-view');
-                showLoading(false);
-                return;
             } else {
                 publicFormMessage.textContent = "Invalid school link.";
                 showView('public-device-form-view');
-                showLoading(false);
-                return;
             }
+            showLoading(false);
+            return;
         }
 
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    if (userData.role === 'admin') {
+                    currentUserData = userDoc.data();
+                    if (currentUserData.role === 'admin') {
                         setupSystemAdminDashboard(user.uid);
-                        showView('admin-dashboard');
-                    } else if (userData.role === 'school-admin') {
-                        const schoolDoc = await getDoc(doc(db, "schools", userData.schoolId));
-                        userData.schoolName = schoolDoc.exists() ? schoolDoc.data().name : 'Unknown School';
-                        setupSchoolAdminDashboard(user.uid, userData.schoolId, userData);
-                        showView('school-admin-dashboard');
+                    } else if (currentUserData.role === 'school-admin') {
+                        const schoolDoc = await getDoc(doc(db, "schools", currentUserData.schoolId));
+                        currentUserData.schoolName = schoolDoc.exists() ? schoolDoc.data().name : 'Unknown School';
+                        setupSchoolAdminDashboard(currentUserData.schoolId);
                     } else {
-                        setupUserDashboard(user.uid, userData);
-                        showView('user-dashboard');
+                        if (currentUserData.schoolId) {
+                            const schoolDoc = await getDoc(doc(db, "schools", currentUserData.schoolId));
+                            currentUserData.schoolName = schoolDoc.exists() ? schoolDoc.data().name : 'Unknown School';
+                        }
+                        setupUserDashboard(user.uid);
                     }
                 } else {
                     showView('login-register-view');
                     authMessage.textContent = "Welcome! Please register your account.";
                 }
             } else {
+                currentUserData = null;
                 showView('login-register-view');
             }
             showLoading(false);
