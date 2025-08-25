@@ -30,6 +30,8 @@ const authButton = document.getElementById('auth-button');
 const toggleAuthBtn = document.getElementById('toggle-auth');
 const registerSchoolBtn = document.getElementById('register-school-btn');
 const authMessage = document.getElementById('auth-message');
+const nameInput = document.getElementById('name');
+const nameContainer = document.getElementById('name-container');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const schoolSelectContainer = document.getElementById('school-select-container');
@@ -99,7 +101,6 @@ function showView(viewId) {
     document.getElementById(viewId).style.display = 'block';
 }
 
-// --- Dynamic Table and Modal Logic ---
 function setupListeners(userRole) {
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', async (e) => {
@@ -108,7 +109,7 @@ function setupListeners(userRole) {
             if (confirm(`Are you sure you want to delete this ${type}?`)) {
                 await deleteItem(id, type);
             }
-        });
+        }, { once: true }); 
     });
 
     if (userRole === 'admin' || userRole === 'school-admin') {
@@ -117,7 +118,7 @@ function setupListeners(userRole) {
                 const id = e.target.dataset.id;
                 const type = e.target.dataset.type;
                 await openEditModal(id, type);
-            });
+            }, { once: true });
         });
     }
 
@@ -433,7 +434,6 @@ function renderContent() {
     }
 }
 
-// --- Dashboard Setup Functions ---
 function setupSystemAdminDashboard(userId) {
     showView('admin-dashboard');
     schoolSearchInput.addEventListener('input', renderContent);
@@ -520,7 +520,6 @@ function setupUserDashboard(userId) {
     });
 }
 
-// Function to populate the school selection dropdown
 async function populateSchoolSelect() {
     schoolSelect.innerHTML = '<option value="">No School</option>';
     try {
@@ -537,7 +536,6 @@ async function populateSchoolSelect() {
     }
 }
 
-// --- Initialization ---
 window.onload = async function() {
     showLoading(true);
     auth.onAuthStateChanged(async (user) => {
@@ -570,7 +568,6 @@ window.onload = async function() {
     });
 };
 
-// --- Event Listeners for Authentication and Modals ---
 toggleAuthBtn.addEventListener('click', async () => {
     isLogin = !isLogin;
     authTitle.textContent = isLogin ? 'Log In' : 'Register';
@@ -578,8 +575,7 @@ toggleAuthBtn.addEventListener('click', async () => {
     toggleAuthBtn.textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Log In";
     authMessage.textContent = '';
     schoolSelectContainer.classList.toggle('hidden', isLogin);
-
-    // If switching to register, fetch and populate schools
+    nameContainer.classList.toggle('hidden', isLogin);
     if (!isLogin) {
         await populateSchoolSelect();
     }
@@ -606,10 +602,12 @@ authForm.addEventListener('submit', async (e) => {
         if (isLogin) {
             await signInWithEmailAndPassword(auth, email, password);
         } else {
+            const name = nameInput.value;
             const schoolId = schoolSelect.value || null;
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             await setDoc(doc(db, "users", user.uid), {
+                name: name,
                 email: user.email,
                 role: 'user',
                 schoolId: schoolId,
