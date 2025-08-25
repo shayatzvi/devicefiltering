@@ -84,12 +84,6 @@
                 <button id="school-admin-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
             </header>
             
-            <div class="mb-6 bg-blue-100 border border-blue-200 p-4 rounded-lg">
-                <h3 class="text-xl font-semibold text-blue-800 mb-2">Device Registration Link</h3>
-                <p class="text-blue-700">Share this link with your students and staff to register their devices:</p>
-                <code id="device-form-link" class="block w-full p-2 bg-blue-200 text-blue-900 rounded-md overflow-x-auto mt-2"></code>
-            </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">School Users</h2>
@@ -119,6 +113,26 @@
                 <p class="text-gray-700" id="user-role-display"></p>
                 <p class="text-gray-700" id="user-school-display"></p>
             </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-lg mt-10 mb-6">
+                <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Register a New Device</h2>
+                <p id="device-register-message" class="text-center text-sm text-gray-600 mb-4"></p>
+                <form id="device-register-form" class="space-y-4">
+                    <div>
+                        <label for="device-name" class="block text-sm font-medium text-gray-700">Device Name</label>
+                        <input type="text" id="device-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div>
+                        <label for="device-make-model" class="block text-sm font-medium text-gray-700">Make / Model</label>
+                        <input type="text" id="device-make-model" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div>
+                        <label for="device-os" class="block text-sm font-medium text-gray-700">Operating System</label>
+                        <input type="text" id="device-os" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors">Register Device</button>
+                </form>
+            </div>
 
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">My Registered Devices</h2>
@@ -126,25 +140,6 @@
                     <input type="text" id="my-device-search" placeholder="Search my devices..." class="w-full p-2 border border-gray-300 rounded-md">
                 </div>
                 <ul id="my-device-list" class="space-y-3"></ul>
-            </div>
-        </div>
-
-        <div id="public-device-form-view" class="view-section max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg mt-10">
-            <h1 id="public-form-title" class="text-3xl font-bold text-center text-gray-800 mb-6">Device Registration</h1>
-            <p id="public-form-message" class="text-center text-sm text-gray-600 mb-4"></p>
-            <form id="public-device-form" class="space-y-4">
-                <div>
-                    <label for="public-user-email" class="block text-sm font-medium text-gray-700">Your Email Address</label>
-                    <input type="email" id="public-user-email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
-                </div>
-                <div>
-                    <label for="public-device-name" class="block text-sm font-medium text-gray-700">Device Name</label>
-                    <input type="text" id="public-device-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
-                </div>
-                <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors">Register Device</button>
-            </form>
-            <div class="mt-6 text-center">
-                <button id="go-home-btn" class="text-blue-600 hover:underline text-sm transition-colors">Go to main page</button>
             </div>
         </div>
 
