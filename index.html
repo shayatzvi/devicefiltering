@@ -21,6 +21,10 @@
             <h1 id="auth-title" class="text-3xl font-bold text-center text-gray-800 mb-6">Log In</h1>
             <p id="auth-message" class="text-center text-sm text-red-500 mb-4"></p>
             <form id="auth-form" class="space-y-4">
+                <div id="name-container" class="hidden">
+                    <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input type="text" id="name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
                     <input type="email" id="email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
