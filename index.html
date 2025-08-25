@@ -1,190 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JabaDrents - Device Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .view-section { display: none; }
-        .hidden { display: none !important; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JabaDrents - Device Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .view-section { display: none; }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body class="bg-gray-100 font-sans">
-    <div id="loading-spinner" class="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
-        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
+    <div id="loading-spinner" class="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
+        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
 
-    <div id="app-container" class="min-h-screen p-4 hidden">
+    <div id="app-container" class="min-h-screen p-4 hidden">
 
-        <div id="login-register-view" class="view-section max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg mt-10">
-            <h1 id="auth-title" class="text-3xl font-bold text-center text-gray-800 mb-6">Log In</h1>
-            <p id="auth-message" class="text-center text-sm text-red-500 mb-4"></p>
-            <form id="auth-form" class="space-y-4">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                    <input type="email" id="email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
-                </div>
-                <div id="school-select-container" class="hidden">
-                    <label for="school-select" class="block text-sm font-medium text-gray-700">Select Your School</label>
-                    <select id="school-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">No School</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="password" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
-                </div>
-                <button id="auth-button" type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">Log In</button>
-            </form>
-            <div class="mt-6 text-center">
-                <button id="toggle-auth" class="text-blue-600 hover:underline text-sm transition-colors">Don't have an account? Register</button>
-                <div class="mt-4">
-                    <button id="register-school-btn" class="text-blue-600 hover:underline text-sm transition-colors">Register a New School (System Admin)</button>
-                </div>
-            </div>
-        </div>
+        <div id="login-register-view" class="view-section max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg mt-10">
+            <h1 id="auth-title" class="text-3xl font-bold text-center text-gray-800 mb-6">Log In</h1>
+            <p id="auth-message" class="text-center text-sm text-red-500 mb-4"></p>
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input type="email" id="email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div id="school-select-container" class="hidden">
+                    <label for="school-select" class="block text-sm font-medium text-gray-700">Select Your School</label>
+                    <select id="school-select" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">No School</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <button id="auth-button" type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">Log In</button>
+            </form>
+            <div class="mt-6 text-center">
+                <button id="toggle-auth" class="text-blue-600 hover:underline text-sm transition-colors">Don't have an account? Register</button>
+                <div class="mt-4">
+                    <button id="register-school-btn" class="text-blue-600 hover:underline text-sm transition-colors">Register a New School (System Admin)</button>
+                </div>
+            </div>
+        </div>
 
-        <div id="admin-dashboard" class="view-section max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <header class="flex justify-between items-center mb-6">
-                <h1 class="text-4xl font-bold text-gray-900">System Admin Dashboard</h1>
-                <button id="admin-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
-            </header>
+        <div id="admin-dashboard" class="view-section max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <header class="flex justify-between items-center mb-6">
+                <h1 class="text-4xl font-bold text-gray-900">System Admin Dashboard</h1>
+                <button id="admin-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
+            </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Schools</h2>
-                    <div class="mb-4">
-                        <input type="text" id="school-search" placeholder="Search schools..." class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <ul id="school-list" class="space-y-3"></ul>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Schools</h2>
+                    <div class="mb-4">
+                        <input type="text" id="school-search" placeholder="Search schools..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <ul id="school-list" class="space-y-3"></ul>
+                </div>
 
-                <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Users</h2>
-                    <div class="mb-4">
-                        <input type="text" id="user-search" placeholder="Search users..." class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <ul id="user-list" class="space-y-3"></ul>
-                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Users</h2>
+                    <div class="mb-4">
+                        <input type="text" id="user-search" placeholder="Search users..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <ul id="user-list" class="space-y-3"></ul>
+                </div>
 
-                <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Devices</h2>
-                    <div class="mb-4">
-                        <input type="text" id="device-search" placeholder="Search devices..." class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <ul id="device-list" class="space-y-3"></ul>
-                </div>
-            </div>
-        </div>
+                <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Devices</h2>
+                    <div class="mb-4">
+                        <input type="text" id="device-search" placeholder="Search devices..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <ul id="device-list" class="space-y-3"></ul>
+                </div>
+            </div>
+        </div>
 
-        <div id="school-admin-dashboard" class="view-section max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <header class="flex justify-between items-center mb-6">
-                <h1 id="school-admin-title" class="text-4xl font-bold text-gray-900">School Admin Dashboard</h1>
-                <button id="school-admin-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
-            </header>
-            
-            <div class="mb-6 bg-blue-100 border border-blue-200 p-4 rounded-lg">
-                <h3 class="text-xl font-semibold text-blue-800 mb-2">Device Registration Link</h3>
-                <p class="text-blue-700">Share this link with your students and staff to register their devices:</p>
-                <code id="device-form-link" class="block w-full p-2 bg-blue-200 text-blue-900 rounded-md overflow-x-auto mt-2"></code>
-            </div>
+        <div id="school-admin-dashboard" class="view-section max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <header class="flex justify-between items-center mb-6">
+                <h1 id="school-admin-title" class="text-4xl font-bold text-gray-900">School Admin Dashboard</h1>
+                <button id="school-admin-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
+            </header>
+            
+            <div class="mb-6 bg-blue-100 border border-blue-200 p-4 rounded-lg">
+                <h3 class="text-xl font-semibold text-blue-800 mb-2">Device Registration Link</h3>
+                <p class="text-blue-700">Share this link with your students and staff to register their devices:</p>
+                <code id="device-form-link" class="block w-full p-2 bg-blue-200 text-blue-900 rounded-md overflow-x-auto mt-2"></code>
+            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">School Users</h2>
-                    <div class="mb-4">
-                        <input type="text" id="school-user-search" placeholder="Search users..." class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <ul id="school-user-list" class="space-y-3"></ul>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">School Devices</h2>
-                    <div class="mb-4">
-                        <input type="text" id="school-device-search" placeholder="Search devices..." class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <ul id="school-device-list" class="space-y-3"></ul>
-                </div>
-            </div>
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">School Users</h2>
+                    <div class="mb-4">
+                        <input type="text" id="school-user-search" placeholder="Search users..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <ul id="school-user-list" class="space-y-3"></ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">School Devices</h2>
+                    <div class="mb-4">
+                        <input type="text" id="school-device-search" placeholder="Search devices..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <ul id="school-device-list" class="space-y-3"></ul>
+                </div>
+            </div>
+        </div>
 
-        <div id="user-dashboard" class="view-section max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <header class="flex justify-between items-center mb-6">
-                <h1 class="text-4xl font-bold text-gray-900">My Dashboard</h1>
-                <button id="user-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
-            </header>
+        <div id="user-dashboard" class="view-section max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <header class="flex justify-between items-center mb-6">
+                <h1 class="text-4xl font-bold text-gray-900">My Dashboard</h1>
+                <button id="user-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
+            </header>
 
-            <div class="bg-white p-6 rounded-lg shadow-md mb-6 space-y-2">
-                <p class="text-gray-700" id="user-email-display"></p>
-                <p class="text-gray-700" id="user-role-display"></p>
-                <p class="text-gray-700" id="user-school-display"></p>
-            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6 space-y-2">
+                <p class="text-gray-700" id="user-email-display"></p>
+                <p class="text-gray-700" id="user-role-display"></p>
+                <p class="text-gray-700" id="user-school-display"></p>
+            </div>
 
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">My Registered Devices</h2>
-                <div class="mb-4">
-                    <input type="text" id="my-device-search" placeholder="Search my devices..." class="w-full p-2 border border-gray-300 rounded-md">
-                </div>
-                <ul id="my-device-list" class="space-y-3"></ul>
-            </div>
-        </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">My Registered Devices</h2>
+                <div class="mb-4">
+                    <input type="text" id="my-device-search" placeholder="Search my devices..." class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <ul id="my-device-list" class="space-y-3"></ul>
+            </div>
+        </div>
 
-        <div id="public-device-form-view" class="view-section max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg mt-10">
-            <h1 id="public-form-title" class="text-3xl font-bold text-center text-gray-800 mb-6">Device Registration</h1>
-            <p id="public-form-message" class="text-center text-sm text-gray-600 mb-4"></p>
-            <form id="public-device-form" class="space-y-4">
-                <div>
-                    <label for="public-user-email" class="block text-sm font-medium text-gray-700">Your Email Address</label>
-                    <input type="email" id="public-user-email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
-                </div>
-                <div>
-                    <label for="public-device-name" class="block text-sm font-medium text-gray-700">Device Name</label>
-                    <input type="text" id="public-device-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
-                </div>
-                <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors">Register Device</button>
-            </form>
-            <div class="mt-6 text-center">
-                <button id="go-home-btn" class="text-blue-600 hover:underline text-sm transition-colors">Go to main page</button>
-            </div>
-        </div>
+        <div id="public-device-form-view" class="view-section max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg mt-10">
+            <h1 id="public-form-title" class="text-3xl font-bold text-center text-gray-800 mb-6">Device Registration</h1>
+            <p id="public-form-message" class="text-center text-sm text-gray-600 mb-4"></p>
+            <form id="public-device-form" class="space-y-4">
+                <div>
+                    <label for="public-user-email" class="block text-sm font-medium text-gray-700">Your Email Address</label>
+                    <input type="email" id="public-user-email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div>
+                    <label for="public-device-name" class="block text-sm font-medium text-gray-700">Device Name</label>
+                    <input type="text" id="public-device-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors">Register Device</button>
+            </form>
+            <div class="mt-6 text-center">
+                <button id="go-home-btn" class="text-blue-600 hover:underline text-sm transition-colors">Go to main page</button>
+            </div>
+        </div>
 
-        <div id="school-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-            <div class="relative p-8 bg-white w-96 rounded-lg shadow-xl">
-                <button id="close-school-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-                <h2 class="text-2xl font-bold mb-4 text-center">Register New School</h2>
-                <p id="school-form-message" class="text-center text-sm text-red-500 mb-4"></p>
-                <form id="school-form" class="space-y-4">
-                    <div>
-                        <label for="school-name-input" class="block text-sm font-medium text-gray-700">School Name</label>
-                        <input type="text" id="school-name-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-                    </div>
-                    <div>
-                        <label for="school-admin-email" class="block text-sm font-medium text-gray-700">Admin Email</label>
-                        <input type="email" id="school-admin-email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-                    </div>
-                    <div>
-                        <label for="school-admin-password" class="block text-sm font-medium text-gray-700">Admin Password</label>
-                        <input type="password" id="school-admin-password" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-                    </div>
-                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">Register School</button>
-                </form>
-            </div>
-        </div>
-        
-        <div id="edit-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-            <div class="relative p-8 bg-white w-96 rounded-lg shadow-xl">
-                <button id="close-edit-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-                <h2 id="edit-modal-title" class="text-2xl font-bold mb-4 text-center">Edit Item</h2>
-                <p id="edit-form-message" class="text-center text-sm text-red-500 mb-4"></p>
-                <form id="edit-form" class="space-y-4">
-                    <div id="edit-fields">
-                        </div>
-                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">Save Changes</button>
-                </form>
-            </div>
-        </div>
-    </div>
+        <div id="school-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+            <div class="relative p-8 bg-white w-96 rounded-lg shadow-xl">
+                <button id="close-school-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+                <h2 class="text-2xl font-bold mb-4 text-center">Register New School</h2>
+                <p id="school-form-message" class="text-center text-sm text-red-500 mb-4"></p>
+                <form id="school-form" class="space-y-4">
+                    <div>
+                        <label for="school-name-input" class="block text-sm font-medium text-gray-700">School Name</label>
+                        <input type="text" id="school-name-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div>
+                        <label for="school-admin-email" class="block text-sm font-medium text-gray-700">Admin Email</label>
+                        <input type="email" id="school-admin-email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div>
+                        <label for="school-admin-password" class="block text-sm font-medium text-gray-700">Admin Password</label>
+                        <input type="password" id="school-admin-password" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">Register School</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="edit-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+            <div class="relative p-8 bg-white w-96 rounded-lg shadow-xl">
+                <button id="close-edit-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+                <h2 id="edit-modal-title" class="text-2xl font-bold mb-4 text-center">Edit Item</h2>
+                <p id="edit-form-message" class="text-center text-sm text-red-500 mb-4"></p>
+                <form id="edit-form" class="space-y-4">
+                    <div id="edit-fields">
+                        </div>
+                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-    <script type="module" src="main.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
