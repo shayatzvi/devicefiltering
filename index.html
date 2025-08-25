@@ -48,16 +48,25 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Schools</h2>
+                    <div class="mb-4">
+                        <input type="text" id="school-search" placeholder="Search schools..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
                     <ul id="school-list" class="space-y-3"></ul>
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Users</h2>
+                    <div class="mb-4">
+                        <input type="text" id="user-search" placeholder="Search users..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
                     <ul id="user-list" class="space-y-3"></ul>
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Devices</h2>
+                    <div class="mb-4">
+                        <input type="text" id="device-search" placeholder="Search devices..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
                     <ul id="device-list" class="space-y-3"></ul>
                 </div>
             </div>
@@ -78,10 +87,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">School Users</h2>
+                    <div class="mb-4">
+                        <input type="text" id="school-user-search" placeholder="Search users..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
                     <ul id="school-user-list" class="space-y-3"></ul>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">School Devices</h2>
+                    <div class="mb-4">
+                        <input type="text" id="school-device-search" placeholder="Search devices..." class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
                     <ul id="school-device-list" class="space-y-3"></ul>
                 </div>
             </div>
@@ -101,6 +116,9 @@
 
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">My Registered Devices</h2>
+                <div class="mb-4">
+                    <input type="text" id="my-device-search" placeholder="Search my devices..." class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
                 <ul id="my-device-list" class="space-y-3"></ul>
             </div>
         </div>
@@ -143,6 +161,19 @@
                         <input type="password" id="school-admin-password" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
                     </div>
                     <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">Register School</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="edit-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+            <div class="relative p-8 bg-white w-96 rounded-lg shadow-xl">
+                <button id="close-edit-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+                <h2 id="edit-modal-title" class="text-2xl font-bold mb-4 text-center">Edit Item</h2>
+                <p id="edit-form-message" class="text-center text-sm text-red-500 mb-4"></p>
+                <form id="edit-form" class="space-y-4">
+                    <div id="edit-fields">
+                        </div>
+                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">Save Changes</button>
                 </form>
             </div>
         </div>
