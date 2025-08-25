@@ -22,7 +22,6 @@ const loginRegisterView = document.getElementById('login-register-view');
 const adminDashboard = document.getElementById('admin-dashboard');
 const schoolAdminDashboard = document.getElementById('school-admin-dashboard');
 const userDashboard = document.getElementById('user-dashboard');
-const publicDeviceFormView = document.getElementById('public-device-form-view');
 const loadingSpinner = document.getElementById('loading-spinner');
 
 const authForm = document.getElementById('auth-form');
@@ -44,7 +43,6 @@ const schoolList = document.getElementById('school-list');
 const userList = document.getElementById('user-list');
 const deviceList = document.getElementById('device-list');
 const schoolAdminTitle = document.getElementById('school-admin-title');
-const deviceFormLink = document.getElementById('device-form-link');
 const schoolUserList = document.getElementById('school-user-list');
 const schoolDeviceList = document.getElementById('school-device-list');
 const myDeviceList = document.getElementById('my-device-list');
@@ -59,12 +57,6 @@ const schoolNameInput = document.getElementById('school-name-input');
 const schoolAdminEmailInput = document.getElementById('school-admin-email');
 const schoolAdminPasswordInput = document.getElementById('school-admin-password');
 const schoolFormMessage = document.getElementById('school-form-message');
-const publicDeviceForm = document.getElementById('public-device-form');
-const publicDeviceNameInput = document.getElementById('public-device-name');
-const publicUserEmailInput = document.getElementById('public-user-email');
-const publicFormTitle = document.getElementById('public-form-title');
-const publicFormMessage = document.getElementById('public-form-message');
-const goHomeBtn = document.getElementById('go-home-btn');
 
 const editModal = document.getElementById('edit-modal');
 const closeEditModalBtn = document.getElementById('close-edit-modal');
@@ -79,6 +71,12 @@ const deviceSearchInput = document.getElementById('device-search');
 const schoolUserSearchInput = document.getElementById('school-user-search');
 const schoolDeviceSearchInput = document.getElementById('school-device-search');
 const myDeviceSearchInput = document.getElementById('my-device-search');
+
+const deviceRegisterForm = document.getElementById('device-register-form');
+const deviceNameInput = document.getElementById('device-name');
+const deviceMakeModelInput = document.getElementById('device-make-model');
+const deviceOsInput = document.getElementById('device-os');
+const deviceRegisterMessage = document.getElementById('device-register-message');
 
 // --- Global State ---
 let allSchools = [];
@@ -99,11 +97,6 @@ function showView(viewId) {
         section.style.display = 'none';
     });
     document.getElementById(viewId).style.display = 'block';
-}
-
-function getQueryParams() {
-    const params = new URLSearchParams(window.location.search);
-    return Object.fromEntries(params.entries());
 }
 
 // --- Dynamic Table and Modal Logic ---
@@ -228,6 +221,14 @@ async function openEditModal(id, type) {
                     <input type="text" id="edit-device-name" value="${itemData.name}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
                 </div>
                 <div>
+                    <label for="edit-device-make-model" class="block text-sm font-medium text-gray-700">Make / Model</label>
+                    <input type="text" id="edit-device-make-model" value="${itemData.makeModel || ''}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div>
+                    <label for="edit-device-os" class="block text-sm font-medium text-gray-700">Operating System</label>
+                    <input type="text" id="edit-device-os" value="${itemData.os || ''}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div>
                     <label for="edit-device-status" class="block text-sm font-medium text-gray-700">Status</label>
                     <select id="edit-device-status" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                         <option value="online" ${itemData.status === 'online' ? 'selected' : ''}>Online</option>
@@ -259,8 +260,10 @@ editForm.addEventListener('submit', async (e) => {
             await updateDoc(doc(db, 'users', id), { email, role });
         } else if (type.includes('device')) {
             const name = document.getElementById('edit-device-name').value;
+            const makeModel = document.getElementById('edit-device-make-model').value;
+            const os = document.getElementById('edit-device-os').value;
             const status = document.getElementById('edit-device-status').value;
-            await updateDoc(doc(db, 'devices', id), { name, status });
+            await updateDoc(doc(db, 'devices', id), { name, makeModel, os, status });
         }
         editModal.classList.add('hidden');
         alert("Changes saved successfully.");
@@ -312,12 +315,13 @@ function createTableHTML(data, type, currentUserId, userRole, searchTerm) {
         case 'devices':
         case 'school-devices':
         case 'my-devices':
-            headers = ['Name', 'Owner Email', 'Status'];
-            if (type === 'my-devices') headers = ['Name', 'Status'];
+            headers = ['Name', 'Make/Model', 'OS', 'Owner Email', 'Status'];
+            if (type === 'my-devices') headers = ['Name', 'Make/Model', 'OS', 'Status'];
             getRowData = async (item) => {
                 const ownerUser = allUsers.find(u => u.id === item.ownerId);
                 const ownerEmail = ownerUser ? ownerUser.email : 'N/A';
-                return type === 'my-devices' ? [item.name, item.status] : [item.name, ownerEmail, item.status];
+                const baseData = [item.name, item.makeModel || 'N/A', item.os || 'N/A'];
+                return type === 'my-devices' ? [...baseData, item.status] : [...baseData, ownerEmail, item.status];
             };
             if (isSearchable) {
                 filteredData = data.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -451,7 +455,6 @@ function setupSystemAdminDashboard(userId) {
  
 function setupSchoolAdminDashboard(schoolId) {
     schoolAdminTitle.textContent = `${currentUserData.schoolName} Admin Dashboard`;
-    deviceFormLink.textContent = `${window.location.origin}${window.location.pathname}?schoolId=${schoolId}`;
     showView('school-admin-dashboard');
     schoolUserSearchInput.addEventListener('input', renderContent);
     schoolDeviceSearchInput.addEventListener('input', renderContent);
@@ -473,66 +476,47 @@ function setupUserDashboard(userId) {
     showView('user-dashboard');
     myDeviceSearchInput.addEventListener('input', renderContent);
 
-    onSnapshot(collection(db, "devices"), (snapshot) => {
-        allDevices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderContent();
-    });
-}
-
-function setupPublicDeviceForm(schoolId) {
-    publicDeviceForm.addEventListener('submit', async (e) => {
+    deviceRegisterForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        deviceRegisterMessage.textContent = '';
         showLoading(true);
-        publicFormMessage.textContent = '';
-        publicFormMessage.classList.remove('text-red-500');
-        
         try {
-            const deviceName = publicDeviceNameInput.value;
-            const userEmail = publicUserEmailInput.value;
-            
-            const usersQuery = query(collection(db, "users"), where("email", "==", userEmail));
-            const usersSnapshot = await getDocs(usersQuery);
-            let userDocRef;
-            let existingUser = null;
-            
-            if (!usersSnapshot.empty) {
-                userDocRef = usersSnapshot.docs[0].ref;
-                existingUser = usersSnapshot.docs[0].data();
-            } else {
-                const anonUserDocRef = doc(collection(db, "users"));
-                await setDoc(anonUserDocRef, {
-                    email: userEmail,
-                    role: 'user',
-                    schoolId: schoolId,
-                    associatedDeviceIds: []
-                });
-                userDocRef = anonUserDocRef;
-                existingUser = { associatedDeviceIds: [] };
-            }
-            
+            const deviceName = deviceNameInput.value;
+            const makeModel = deviceMakeModelInput.value;
+            const os = deviceOsInput.value;
+            const ownerId = auth.currentUser.uid;
+            const schoolId = currentUserData.schoolId;
+
             const newDeviceRef = await addDoc(collection(db, "devices"), {
                 name: deviceName,
+                makeModel: makeModel,
+                os: os,
                 status: 'online',
-                ownerId: userDocRef.id,
+                ownerId: ownerId,
                 schoolId: schoolId
             });
-            
-            const newDeviceIds = [...(existingUser.associatedDeviceIds || []), newDeviceRef.id];
-            await updateDoc(userDocRef, {
-                associatedDeviceIds: newDeviceIds
+
+            await updateDoc(doc(db, "users", ownerId), {
+                associatedDeviceIds: [...(currentUserData.associatedDeviceIds || []), newDeviceRef.id]
             });
-            
-            publicFormMessage.textContent = `Device "${deviceName}" successfully registered!`;
-            publicFormMessage.classList.add('text-green-500');
-            publicDeviceForm.reset();
-            
+
+            deviceRegisterMessage.textContent = "Device registered successfully!";
+            deviceRegisterMessage.classList.remove('text-red-500');
+            deviceRegisterMessage.classList.add('text-green-500');
+            deviceRegisterForm.reset();
         } catch (error) {
             console.error("Device registration error:", error);
-            publicFormMessage.textContent = "An error occurred during registration. Please try again.";
-            publicFormMessage.classList.add('text-red-500');
+            deviceRegisterMessage.textContent = `Error: ${error.message}`;
+            deviceRegisterMessage.classList.remove('text-green-500');
+            deviceRegisterMessage.classList.add('text-red-500');
         } finally {
             showLoading(false);
         }
+    });
+
+    onSnapshot(collection(db, "devices"), (snapshot) => {
+        allDevices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderContent();
     });
 }
 
@@ -556,55 +540,34 @@ async function populateSchoolSelect() {
 // --- Initialization ---
 window.onload = async function() {
     showLoading(true);
-    try {
-        const params = getQueryParams();
-        if (params.schoolId) {
-            const schoolDoc = await getDoc(doc(db, "schools", params.schoolId));
-            if (schoolDoc.exists()) {
-                publicFormTitle.textContent = `Device Registration for ${schoolDoc.data().name}`;
-                setupPublicDeviceForm(params.schoolId);
-                showView('public-device-form-view');
-            } else {
-                publicFormMessage.textContent = "Invalid school link.";
-                showView('public-device-form-view');
-            }
-            showLoading(false);
-            return;
-        }
-
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    currentUserData = userDoc.data();
-                    if (currentUserData.role === 'admin') {
-                        setupSystemAdminDashboard(user.uid);
-                    } else if (currentUserData.role === 'school-admin') {
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                currentUserData = userDoc.data();
+                if (currentUserData.role === 'admin') {
+                    setupSystemAdminDashboard(user.uid);
+                } else if (currentUserData.role === 'school-admin') {
+                    const schoolDoc = await getDoc(doc(db, "schools", currentUserData.schoolId));
+                    currentUserData.schoolName = schoolDoc.exists() ? schoolDoc.data().name : 'Unknown School';
+                    setupSchoolAdminDashboard(currentUserData.schoolId);
+                } else {
+                    if (currentUserData.schoolId) {
                         const schoolDoc = await getDoc(doc(db, "schools", currentUserData.schoolId));
                         currentUserData.schoolName = schoolDoc.exists() ? schoolDoc.data().name : 'Unknown School';
-                        setupSchoolAdminDashboard(currentUserData.schoolId);
-                    } else {
-                        if (currentUserData.schoolId) {
-                            const schoolDoc = await getDoc(doc(db, "schools", currentUserData.schoolId));
-                            currentUserData.schoolName = schoolDoc.exists() ? schoolDoc.data().name : 'Unknown School';
-                        }
-                        setupUserDashboard(user.uid);
                     }
-                } else {
-                    showView('login-register-view');
-                    authMessage.textContent = "Welcome! Please register your account.";
+                    setupUserDashboard(user.uid);
                 }
             } else {
-                currentUserData = null;
                 showView('login-register-view');
+                authMessage.textContent = "Welcome! Please register your account.";
             }
-            showLoading(false);
-        });
-    } catch (error) {
-        console.error("Firebase initialization failed:", error);
-        authMessage.textContent = "An error occurred. Please try again.";
+        } else {
+            currentUserData = null;
+            showView('login-register-view');
+        }
         showLoading(false);
-    }
+    });
 };
 
 // --- Event Listeners for Authentication and Modals ---
@@ -630,10 +593,6 @@ closeSchoolModalBtn.addEventListener('click', () => {
     schoolModal.classList.add('hidden');
     schoolForm.reset();
     schoolFormMessage.textContent = '';
-});
-
-goHomeBtn.addEventListener('click', () => {
-    window.location.href = window.location.origin + window.location.pathname;
 });
 
 authForm.addEventListener('submit', async (e) => {
