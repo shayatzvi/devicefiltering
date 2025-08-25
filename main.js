@@ -55,7 +55,7 @@ const closeSchoolModalBtn = document.getElementById('close-school-modal');
 const schoolForm = document.getElementById('school-form');
 const schoolNameInput = document.getElementById('school-name-input');
 const schoolAdminEmailInput = document.getElementById('school-admin-email');
-const schoolAdminPasswordInput = document = document.getElementById('school-admin-password');
+const schoolAdminPasswordInput = document.getElementById('school-admin-password');
 const schoolFormMessage = document.getElementById('school-form-message');
 const publicDeviceForm = document.getElementById('public-device-form');
 const publicDeviceNameInput = document.getElementById('public-device-name');
