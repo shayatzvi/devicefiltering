@@ -3,812 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User & Device Manager</title>
-    <!-- Tailwind CSS CDN -->
+    <title>JabaDrents - Device Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .view-section {
-            display: none;
-        }
+        .view-section { display: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-
-    <!-- Loading Spinner -->
-    <div id="loading-spinner" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+<body class="bg-gray-100 font-sans">
+    <div id="loading-spinner" class="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 hidden">
+        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
     </div>
 
-    <!-- Main Container -->
-    <div id="app-container" class="w-full max-w-4xl bg-white rounded-xl shadow-lg p-8">
+    <div id="app-container" class="min-h-screen p-4">
 
-        <!-- Login / Registration View -->
-        <section id="login-register-view" class="view-section text-center">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6">User & Device Manager</h1>
-            <div class="max-w-md mx-auto p-6 bg-gray-50 rounded-lg">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-700" id="auth-title">Log In</h2>
-                <form id="auth-form" class="space-y-4">
-                    <input type="email" id="email" placeholder="Email" required
-                           class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="password" id="password" placeholder="Password" required
-                           class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button type="submit" id="auth-button"
-                            class="w-full p-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-                        Log In
-                    </button>
-                </form>
-                <div class="mt-4 space-y-2">
-                    <button id="toggle-auth" class="text-sm text-blue-600 hover:underline">
-                        Don't have an account? Register
-                    </button>
-                    <button id="register-school-btn" class="text-sm text-purple-600 hover:underline block w-full">
-                        Are you a school? Register here
-                    </button>
+        <div id="login-register-view" class="view-section max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg mt-10">
+            <h1 id="auth-title" class="text-3xl font-bold text-center text-gray-800 mb-6">Log In</h1>
+            <p id="auth-message" class="text-center text-sm text-red-500 mb-4"></p>
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input type="email" id="email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
                 </div>
-                <p id="auth-message" class="mt-4 text-red-500"></p>
-            </div>
-        </section>
-
-        <!-- Admin Dashboard (System Admin) -->
-        <section id="admin-dashboard" class="view-section">
-            <header class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">System Admin Dashboard</h1>
-                <button id="admin-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                    Logout
-                </button>
-            </header>
-
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- Users Panel -->
-                <div class="bg-gray-50 rounded-lg p-6 shadow-md">
-                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">All Users</h2>
-                    <ul id="user-list" class="space-y-4">
-                        <!-- User items will be injected here -->
-                    </ul>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
                 </div>
-
-                <!-- Schools Panel -->
-                <div class="bg-gray-50 rounded-lg p-6 shadow-md">
-                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">All Schools</h2>
-                    <ul id="school-list" class="space-y-4">
-                        <!-- School items will be injected here -->
-                    </ul>
+                <button id="auth-button" type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">Log In</button>
+            </form>
+            <div class="mt-6 text-center">
+                <button id="toggle-auth" class="text-blue-600 hover:underline text-sm transition-colors">Don't have an account? Register</button>
+                <div class="mt-4">
+                    <button id="register-school-btn" class="text-blue-600 hover:underline text-sm transition-colors">Register a New School (System Admin)</button>
                 </div>
-            </div>
-            
-            <div class="mt-8 bg-gray-50 rounded-lg p-6 shadow-md">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">All Devices</h2>
-                <ul id="device-list" class="space-y-4">
-                    <!-- Device items will be injected here -->
-                </ul>
-            </div>
-        </section>
-
-        <!-- School Admin Dashboard -->
-        <section id="school-admin-dashboard" class="view-section">
-            <header class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-gray-800" id="school-admin-title">School Admin Dashboard</h1>
-                <button id="school-admin-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                    Logout
-                </button>
-            </header>
-            
-            <p class="text-gray-500 mb-4">To share the device registration form with your school, use this link: <code id="device-form-link" class="bg-gray-200 p-1 rounded-md"></code></p>
-
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- School Users Panel -->
-                <div class="bg-gray-50 rounded-lg p-6 shadow-md">
-                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">School Users</h2>
-                    <ul id="school-user-list" class="space-y-4">
-                        <!-- School user items will be injected here -->
-                    </ul>
-                </div>
-
-                <!-- School Devices Panel -->
-                <div class="bg-gray-50 rounded-lg p-6 shadow-md">
-                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">School Devices</h2>
-                    <ul id="school-device-list" class="space-y-4">
-                        <!-- School device items will be injected here -->
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- Regular User Dashboard -->
-        <section id="user-dashboard" class="view-section">
-            <header class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">User Dashboard</h1>
-                <button id="user-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                    Logout
-                </button>
-            </header>
-
-            <!-- User Info -->
-            <div class="bg-gray-50 rounded-lg p-6 shadow-md mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-2">My Profile</h2>
-                <p id="user-email-display" class="text-lg text-gray-600"></p>
-                <p id="user-role-display" class="text-lg text-gray-600 capitalize"></p>
-                <p id="user-school-display" class="text-lg text-gray-600"></p>
-            </div>
-
-            <!-- My Devices -->
-            <div class="bg-gray-50 rounded-lg p-6 shadow-md">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">My Devices</h2>
-                <button id="add-device-btn" class="py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors mb-4">
-                    Register New Device
-                </button>
-                <ul id="my-device-list" class="space-y-4">
-                    <!-- User's device items will be injected here -->
-                </ul>
-            </div>
-        </section>
-        
-        <!-- Public Device Registration Form -->
-        <section id="public-device-form-view" class="view-section text-center">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6" id="public-form-title">Device Registration</h1>
-            <div class="max-w-md mx-auto p-6 bg-gray-50 rounded-lg">
-                <form id="public-device-form" class="space-y-4">
-                    <input type="text" id="public-device-name" placeholder="Device Name" required
-                           class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="email" id="public-user-email" placeholder="Your Email" required
-                           class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button type="submit"
-                            class="w-full p-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-                        Register Device
-                    </button>
-                </form>
-                <p id="public-form-message" class="mt-4 text-green-500"></p>
-                <button id="go-home-btn" class="mt-4 text-sm text-gray-500 hover:underline">Go to Login</button>
-            </div>
-        </section>
-
-
-        <!-- Modal for School Registration -->
-        <div id="school-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 hidden">
-            <div class="bg-white rounded-xl p-8 max-w-md w-full shadow-lg">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Register Your School</h2>
-                <form id="school-form" class="space-y-4">
-                    <input type="text" id="school-name-input" placeholder="School Name" required
-                           class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="email" id="school-admin-email" placeholder="Admin Email" required
-                           class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="password" id="school-admin-password" placeholder="Admin Password" required
-                           class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button type="submit" class="w-full p-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors">
-                        Register School
-                    </button>
-                </form>
-                <p id="school-form-message" class="mt-4 text-red-500"></p>
-                <button id="close-school-modal" class="mt-4 text-sm text-gray-500 hover:underline">Cancel</button>
             </div>
         </div>
-        
+
+        <div id="admin-dashboard" class="view-section max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <header class="flex justify-between items-center mb-6">
+                <h1 class="text-4xl font-bold text-gray-900">System Admin Dashboard</h1>
+                <button id="admin-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Schools</h2>
+                    <ul id="school-list" class="space-y-3"></ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Users</h2>
+                    <ul id="user-list" class="space-y-3"></ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-1">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Devices</h2>
+                    <ul id="device-list" class="space-y-3"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="school-admin-dashboard" class="view-section max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <header class="flex justify-between items-center mb-6">
+                <h1 id="school-admin-title" class="text-4xl font-bold text-gray-900">School Admin Dashboard</h1>
+                <button id="school-admin-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
+            </header>
+            
+            <div class="mb-6 bg-blue-100 border border-blue-200 p-4 rounded-lg">
+                <h3 class="text-xl font-semibold text-blue-800 mb-2">Device Registration Link</h3>
+                <p class="text-blue-700">Share this link with your students and staff to register their devices:</p>
+                <code id="device-form-link" class="block w-full p-2 bg-blue-200 text-blue-900 rounded-md overflow-x-auto mt-2"></code>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">School Users</h2>
+                    <ul id="school-user-list" class="space-y-3"></ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">School Devices</h2>
+                    <ul id="school-device-list" class="space-y-3"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="user-dashboard" class="view-section max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <header class="flex justify-between items-center mb-6">
+                <h1 class="text-4xl font-bold text-gray-900">My Dashboard</h1>
+                <button id="user-logout-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-colors">Log Out</button>
+            </header>
+
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6 space-y-2">
+                <p class="text-gray-700" id="user-email-display"></p>
+                <p class="text-gray-700" id="user-role-display"></p>
+                <p class="text-gray-700" id="user-school-display"></p>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">My Registered Devices</h2>
+                <ul id="my-device-list" class="space-y-3"></ul>
+            </div>
+        </div>
+
+        <div id="public-device-form-view" class="view-section max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg mt-10">
+            <h1 id="public-form-title" class="text-3xl font-bold text-center text-gray-800 mb-6">Device Registration</h1>
+            <p id="public-form-message" class="text-center text-sm text-gray-600 mb-4"></p>
+            <form id="public-device-form" class="space-y-4">
+                <div>
+                    <label for="public-user-email" class="block text-sm font-medium text-gray-700">Your Email Address</label>
+                    <input type="email" id="public-user-email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div>
+                    <label for="public-device-name" class="block text-sm font-medium text-gray-700">Device Name</label>
+                    <input type="text" id="public-device-name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors">Register Device</button>
+            </form>
+            <div class="mt-6 text-center">
+                <button id="go-home-btn" class="text-blue-600 hover:underline text-sm transition-colors">Go to main page</button>
+            </div>
+        </div>
+
+        <div id="school-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+            <div class="relative p-8 bg-white w-96 rounded-lg shadow-xl">
+                <button id="close-school-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+                <h2 class="text-2xl font-bold mb-4 text-center">Register New School</h2>
+                <p id="school-form-message" class="text-center text-sm text-red-500 mb-4"></p>
+                <form id="school-form" class="space-y-4">
+                    <div>
+                        <label for="school-name-input" class="block text-sm font-medium text-gray-700">School Name</label>
+                        <input type="text" id="school-name-input" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div>
+                        <label for="school-admin-email" class="block text-sm font-medium text-gray-700">Admin Email</label>
+                        <input type="email" id="school-admin-email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div>
+                        <label for="school-admin-password" class="block text-sm font-medium text-gray-700">Admin Password</label>
+                        <input type="password" id="school-admin-password" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">Register School</button>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- IMPORTANT: REPLACE WITH YOUR FIREBASE CONFIG ---
-        // This is where you will paste the code from your Firebase console.
-        const firebaseConfig = {
-          // Paste your config here
-          apiKey: "AIzaSyBCDun9-yoZvZDWMwqqJIv4Txmxb2pNmSw",
-  authDomain: "jabadrents.firebaseapp.com",
-  projectId: "jabadrents",
-  storageBucket: "jabadrents.firebasestorage.app",
-  messagingSenderId: "564640290953",
-  appId: "1:564640290953:web:b3edf2a0944401dbd84e58"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // --- UI Elements ---
-        const appContainer = document.getElementById('app-container');
-        const loginRegisterView = document.getElementById('login-register-view');
-        const adminDashboard = document.getElementById('admin-dashboard');
-        const schoolAdminDashboard = document.getElementById('school-admin-dashboard');
-        const userDashboard = document.getElementById('user-dashboard');
-        const publicDeviceFormView = document.getElementById('public-device-form-view');
-        const loadingSpinner = document.getElementById('loading-spinner');
-
-        const authForm = document.getElementById('auth-form');
-        const authTitle = document.getElementById('auth-title');
-        const authButton = document.getElementById('auth-button');
-        const toggleAuthBtn = document.getElementById('toggle-auth');
-        const registerSchoolBtn = document.getElementById('register-school-btn');
-        const authMessage = document.getElementById('auth-message');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-
-        const adminLogoutBtn = document.getElementById('admin-logout-btn');
-        const schoolAdminLogoutBtn = document.getElementById('school-admin-logout-btn');
-        const userLogoutBtn = document.getElementById('user-logout-btn');
-
-        const userList = document.getElementById('user-list');
-        const deviceList = document.getElementById('device-list');
-        const schoolList = document.getElementById('school-list');
-        
-        const schoolAdminTitle = document.getElementById('school-admin-title');
-        const deviceFormLink = document.getElementById('device-form-link');
-        const schoolUserList = document.getElementById('school-user-list');
-        const schoolDeviceList = document.getElementById('school-device-list');
-
-        const myDeviceList = document.getElementById('my-device-list');
-        const userEmailDisplay = document.getElementById('user-email-display');
-        const userRoleDisplay = document.getElementById('user-role-display');
-        const userSchoolDisplay = document.getElementById('user-school-display');
-
-        const schoolModal = document.getElementById('school-modal');
-        const closeSchoolModalBtn = document.getElementById('close-school-modal');
-        const schoolForm = document.getElementById('school-form');
-        const schoolNameInput = document.getElementById('school-name-input');
-        const schoolAdminEmailInput = document.getElementById('school-admin-email');
-        const schoolAdminPasswordInput = document.getElementById('school-admin-password');
-        const schoolFormMessage = document.getElementById('school-form-message');
-        
-        const publicDeviceForm = document.getElementById('public-device-form');
-        const publicDeviceNameInput = document.getElementById('public-device-name');
-        const publicUserEmailInput = document.getElementById('public-user-email');
-        const publicFormTitle = document.getElementById('public-form-title');
-        const publicFormMessage = document.getElementById('public-form-message');
-        const goHomeBtn = document.getElementById('go-home-btn');
-
-
-        // --- State Variables ---
-        let isLogin = true;
-
-        // --- Helper Functions ---
-        function showLoading(show) {
-            loadingSpinner.classList.toggle('hidden', !show);
-            appContainer.classList.toggle('hidden', show);
-        }
-
-        function showView(viewId) {
-            document.querySelectorAll('.view-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            document.getElementById(viewId).style.display = 'block';
-        }
-
-        function getQueryParams() {
-            const params = new URLSearchParams(window.location.search);
-            return Object.fromEntries(params.entries());
-        }
-
-        // --- Initialization ---
-        window.onload = async function() {
-            showLoading(true);
-            try {
-                const params = getQueryParams();
-                if (params.schoolId) {
-                    const schoolDoc = await getDoc(doc(db, "schools", params.schoolId));
-                    if (schoolDoc.exists()) {
-                        publicFormTitle.textContent = `Device Registration for ${schoolDoc.data().name}`;
-                        setupPublicDeviceForm(params.schoolId);
-                        showView('public-device-form-view');
-                        showLoading(false);
-                        return;
-                    } else {
-                        publicFormMessage.textContent = "Invalid school link.";
-                        showView('public-device-form-view');
-                        showLoading(false);
-                        return;
-                    }
-                }
-
-                // Listen for authentication state changes
-                auth.onAuthStateChanged(async (user) => {
-                    if (user) {
-                        const userDoc = await getDoc(doc(db, "users", user.uid));
-                        if (userDoc.exists()) {
-                            const userData = userDoc.data();
-                            if (userData.role === 'admin') {
-                                setupSystemAdminDashboard(user.uid);
-                                showView('admin-dashboard');
-                            } else if (userData.role === 'school-admin') {
-                                setupSchoolAdminDashboard(user.uid, userData.schoolId, userData);
-                                showView('school-admin-dashboard');
-                            } else {
-                                setupUserDashboard(user.uid, userData);
-                                showView('user-dashboard');
-                            }
-                        } else {
-                            showView('login-register-view');
-                            authMessage.textContent = "Welcome! Please register your account.";
-                        }
-                    } else {
-                        showView('login-register-view');
-                    }
-                    showLoading(false);
-                });
-
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                authMessage.textContent = "An error occurred. Please try again.";
-                showLoading(false);
-            }
-        };
-
-        // --- Event Listeners for Authentication ---
-        toggleAuthBtn.addEventListener('click', () => {
-            isLogin = !isLogin;
-            authTitle.textContent = isLogin ? 'Log In' : 'Register';
-            authButton.textContent = isLogin ? 'Log In' : 'Register';
-            toggleAuthBtn.textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Log In";
-            authMessage.textContent = '';
-        });
-
-        registerSchoolBtn.addEventListener('click', () => {
-            schoolModal.classList.remove('hidden');
-        });
-
-        closeSchoolModalBtn.addEventListener('click', () => {
-            schoolModal.classList.add('hidden');
-            schoolForm.reset();
-            schoolFormMessage.textContent = '';
-        });
-        
-        goHomeBtn.addEventListener('click', () => {
-             window.location.href = window.location.origin + window.location.pathname;
-        });
-
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            authMessage.textContent = '';
-            showLoading(true);
-
-            try {
-                if (isLogin) {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } else {
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    const user = userCredential.user;
-                    await setDoc(doc(db, "users", user.uid), {
-                        email: user.email,
-                        role: 'user', // Default role is 'user'
-                        schoolId: null
-                    });
-                }
-            } catch (error) {
-                console.error("Authentication error:", error);
-                authMessage.textContent = error.message;
-            } finally {
-                showLoading(false);
-            }
-        });
-        
-        schoolForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            schoolFormMessage.textContent = '';
-            showLoading(true);
-            try {
-                const schoolName = schoolNameInput.value;
-                const email = schoolAdminEmailInput.value;
-                const password = schoolAdminPasswordInput.value;
-                
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                
-                // Create a school document first
-                const newSchoolRef = await addDoc(collection(db, "schools"), {
-                    name: schoolName,
-                    adminUserId: user.uid
-                });
-                
-                // Then create the user document with a 'school-admin' role and link to the school
-                await setDoc(doc(db, "users", user.uid), {
-                    email: user.email,
-                    role: 'school-admin',
-                    schoolId: newSchoolRef.id
-                });
-                
-                schoolModal.classList.add('hidden');
-            } catch (error) {
-                console.error("School registration error:", error);
-                schoolFormMessage.textContent = error.message;
-            } finally {
-                showLoading(false);
-            }
-        });
-
-        adminLogoutBtn.addEventListener('click', () => signOut(auth));
-        schoolAdminLogoutBtn.addEventListener('click', () => signOut(auth));
-        userLogoutBtn.addEventListener('click', () => signOut(auth));
-
-        // --- System Admin Dashboard Logic ---
-        function setupSystemAdminDashboard(adminId) {
-            onSnapshot(collection(db, "users"), (snapshot) => {
-                const users = [];
-                snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-                renderSystemUsers(users, adminId);
-            });
-
-            onSnapshot(collection(db, "devices"), (snapshot) => {
-                const devices = [];
-                snapshot.forEach(doc => devices.push({ id: doc.id, ...doc.data() }));
-                renderSystemDevices(devices);
-            });
-            
-            onSnapshot(collection(db, "schools"), (snapshot) => {
-                const schools = [];
-                snapshot.forEach(doc => schools.push({ id: doc.id, ...doc.data() }));
-                renderSystemSchools(schools);
-            });
-        }
-        
-        // --- School Admin Dashboard Logic ---
-        function setupSchoolAdminDashboard(schoolAdminId, schoolId, userData) {
-            schoolAdminTitle.textContent = `${userData.schoolName} Admin Dashboard`;
-            deviceFormLink.textContent = `${window.location.origin}${window.location.pathname}?schoolId=${schoolId}`;
-            
-            const usersQuery = query(collection(db, "users"), where("schoolId", "==", schoolId));
-            onSnapshot(usersQuery, (snapshot) => {
-                const users = [];
-                snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-                renderSchoolUsers(users, schoolAdminId);
-            });
-            
-            const devicesQuery = query(collection(db, "devices"), where("schoolId", "==", schoolId));
-            onSnapshot(devicesQuery, (snapshot) => {
-                const devices = [];
-                snapshot.forEach(doc => devices.push({ id: doc.id, ...doc.data() }));
-                renderSchoolDevices(devices);
-            });
-        }
-
-        // --- Regular User Dashboard Logic ---
-        function setupUserDashboard(currentUserId, userData) {
-            userEmailDisplay.textContent = `Email: ${userData.email}`;
-            userRoleDisplay.textContent = `Role: ${userData.role}`;
-            
-            if (userData.schoolId) {
-                onSnapshot(doc(db, "schools", userData.schoolId), (schoolDoc) => {
-                    if (schoolDoc.exists()) {
-                        userSchoolDisplay.textContent = `School: ${schoolDoc.data().name}`;
-                    } else {
-                        userSchoolDisplay.textContent = `School: N/A`;
-                    }
-                });
-            } else {
-                 userSchoolDisplay.textContent = `School: N/A`;
-            }
-
-            const userDocRef = doc(db, "users", currentUserId);
-            onSnapshot(userDocRef, (userDoc) => {
-                if (userDoc.exists()) {
-                    const updatedUserData = userDoc.data();
-                    const deviceIds = updatedUserData.associatedDeviceIds || [];
-                    if (deviceIds.length > 0) {
-                        const devicesCollectionRef = collection(db, "devices");
-                        const q = query(devicesCollectionRef, where("ownerId", "==", currentUserId));
-                        onSnapshot(q, (snapshot) => {
-                            const devices = [];
-                            snapshot.forEach(doc => devices.push({ id: doc.id, ...doc.data() }));
-                            renderMyDevices(devices);
-                        });
-                    } else {
-                        renderMyDevices([]);
-                    }
-                }
-            });
-        }
-        
-        // --- Public Device Registration Form Logic ---
-        function setupPublicDeviceForm(schoolId) {
-            publicDeviceForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                showLoading(true);
-                publicFormMessage.textContent = '';
-                try {
-                    const deviceName = publicDeviceNameInput.value;
-                    const userEmail = publicUserEmailInput.value;
-                    
-                    const usersQuery = query(collection(db, "users"), where("email", "==", userEmail));
-                    const usersSnapshot = await getDocs(usersQuery);
-                    let userDocRef;
-                    let existingUser = null;
-                    
-                    if (!usersSnapshot.empty) {
-                        userDocRef = usersSnapshot.docs[0].ref;
-                        existingUser = usersSnapshot.docs[0].data();
-                    } else {
-                        const anonUserDocRef = doc(collection(db, "users"));
-                        await setDoc(anonUserDocRef, {
-                            email: userEmail,
-                            role: 'user',
-                            schoolId: schoolId
-                        });
-                        userDocRef = anonUserDocRef;
-                        existingUser = { associatedDeviceIds: [] };
-                    }
-                    
-                    const newDeviceRef = await addDoc(collection(db, "devices"), {
-                        name: deviceName,
-                        status: 'online',
-                        ownerId: userDocRef.id,
-                        schoolId: schoolId
-                    });
-                    
-                    const newDeviceIds = [...(existingUser.associatedDeviceIds || []), newDeviceRef.id];
-                    await updateDoc(userDocRef, {
-                        associatedDeviceIds: newDeviceIds
-                    });
-                    
-                    publicFormMessage.textContent = `Device "${deviceName}" successfully registered!`;
-                    publicDeviceForm.reset();
-                    
-                } catch (error) {
-                    console.error("Device registration error:", error);
-                    publicFormMessage.textContent = "An error occurred during registration. Please try again.";
-                    publicFormMessage.classList.remove('text-green-500');
-                    publicFormMessage.classList.add('text-red-500');
-                } finally {
-                    showLoading(false);
-                }
-            });
-        }
-
-
-        // --- Rendering Functions ---
-        function renderSystemUsers(users, adminId) {
-            userList.innerHTML = '';
-            users.forEach(user => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-white p-3 rounded-lg shadow-sm';
-                li.innerHTML = `
-                    <div class="flex-1 overflow-hidden">
-                        <p class="font-medium text-gray-800 truncate">${user.email}</p>
-                        <p class="text-sm text-gray-500 capitalize">ID: <span class="text-xs">${user.id}</span></p>
-                        <p class="text-sm text-gray-500 capitalize">Role: ${user.role}</p>
-                    </div>
-                    ${user.id !== adminId ? `<button data-user-id="${user.id}" class="delete-user-btn ml-4 py-1 px-3 text-sm bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors">Delete</button>` : ''}
-                `;
-                userList.appendChild(li);
-            });
-
-            document.querySelectorAll('.delete-user-btn').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const userIdToDelete = e.target.dataset.userId;
-                    try {
-                        await deleteDoc(doc(db, "users", userIdToDelete));
-                        const devicesQuery = query(collection(db, "devices"), where("ownerId", "==", userIdToDelete));
-                        const devicesSnapshot = await getDocs(devicesQuery);
-                        const batch = db.runBatch();
-                        devicesSnapshot.forEach(deviceDoc => {
-                            batch.delete(deviceDoc.ref);
-                        });
-                        await batch.commit();
-                    } catch (error) {
-                        console.error("Error deleting user:", error);
-                    }
-                });
-            });
-        }
-        
-        function renderSystemSchools(schools) {
-            schoolList.innerHTML = '';
-            schools.forEach(school => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-white p-3 rounded-lg shadow-sm';
-                li.innerHTML = `
-                    <div class="flex-1 overflow-hidden">
-                        <p class="font-medium text-gray-800 truncate">${school.name}</p>
-                        <p class="text-sm text-gray-500 capitalize">ID: <span class="text-xs">${school.id}</span></p>
-                    </div>
-                    <button data-school-id="${school.id}" class="delete-school-btn py-1 px-3 text-sm bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors">Delete</button>
-                `;
-                schoolList.appendChild(li);
-            });
-            
-            document.querySelectorAll('.delete-school-btn').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const schoolIdToDelete = e.target.dataset.schoolId;
-                    try {
-                        const batch = db.runBatch();
-                        const usersQuery = query(collection(db, "users"), where("schoolId", "==", schoolIdToDelete));
-                        const usersSnapshot = await getDocs(usersQuery);
-                        usersSnapshot.forEach(userDoc => {
-                            batch.delete(userDoc.ref);
-                        });
-                        const devicesQuery = query(collection(db, "devices"), where("schoolId", "==", schoolIdToDelete));
-                        const devicesSnapshot = await getDocs(devicesQuery);
-                        devicesSnapshot.forEach(deviceDoc => {
-                            batch.delete(deviceDoc.ref);
-                        });
-                        batch.delete(doc(db, "schools", schoolIdToDelete));
-                        await batch.commit();
-                    } catch (error) {
-                        console.error("Error deleting school:", error);
-                    }
-                });
-            });
-        }
-
-        function renderSystemDevices(devices) {
-            deviceList.innerHTML = '';
-            devices.forEach(device => {
-                const statusColor = device.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-white p-3 rounded-lg shadow-sm';
-                li.innerHTML = `
-                    <div class="flex-1 overflow-hidden">
-                        <p class="font-medium text-gray-800 truncate">${device.name}</p>
-                        <p class="text-sm text-gray-500 capitalize">ID: <span class="text-xs">${device.id}</span></p>
-                        <p class="text-sm text-gray-500 truncate">Owner: ${device.ownerId}</p>
-                        <p class="text-sm text-gray-500 truncate">School: ${device.schoolId}</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="py-1 px-3 text-xs font-semibold rounded-full ${statusColor}">${device.status}</span>
-                        <select data-device-id="${device.id}" class="status-select p-1 text-sm border rounded-lg focus:outline-none">
-                            <option value="online" ${device.status === 'online' ? 'selected' : ''}>Online</option>
-                            <option value="offline" ${device.status === 'offline' ? 'selected' : ''}>Offline</option>
-                        </select>
-                        <button data-device-id="${device.id}" class="delete-device-btn py-1 px-3 text-sm bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors">Delete</button>
-                    </div>
-                `;
-                deviceList.appendChild(li);
-            });
-
-            document.querySelectorAll('.status-select').forEach(select => {
-                select.addEventListener('change', async (e) => {
-                    const deviceId = e.target.dataset.deviceId;
-                    const newStatus = e.target.value;
-                    try {
-                        await updateDoc(doc(db, "devices", deviceId), { status: newStatus });
-                    } catch (error) {
-                        console.error("Error updating device status:", error);
-                    }
-                });
-            });
-
-            document.querySelectorAll('.delete-device-btn').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const deviceIdToDelete = e.target.dataset.deviceId;
-                    try {
-                        const usersQuery = query(collection(db, "users"), where("associatedDeviceIds", "array-contains", deviceIdToDelete));
-                        const usersSnapshot = await getDocs(usersQuery);
-                        const userDoc = usersSnapshot.docs[0];
-                        if (userDoc) {
-                            const newDeviceIds = userDoc.data().associatedDeviceIds.filter(id => id !== deviceIdToDelete);
-                            await updateDoc(userDoc.ref, { associatedDeviceIds: newDeviceIds });
-                        }
-                        await deleteDoc(doc(db, "devices", deviceIdToDelete));
-                    } catch (error) {
-                        console.error("Error deleting device:", error);
-                    }
-                });
-            });
-        }
-
-        function renderSchoolUsers(users, schoolAdminId) {
-            schoolUserList.innerHTML = '';
-            users.forEach(user => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-white p-3 rounded-lg shadow-sm';
-                li.innerHTML = `
-                    <div class="flex-1 overflow-hidden">
-                        <p class="font-medium text-gray-800 truncate">${user.email}</p>
-                        <p class="text-sm text-gray-500 capitalize">ID: <span class="text-xs">${user.id}</span></p>
-                        <p class="text-sm text-gray-500 capitalize">Role: ${user.role}</p>
-                    </div>
-                    ${user.id !== schoolAdminId ? `<button data-user-id="${user.id}" class="delete-user-btn ml-4 py-1 px-3 text-sm bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors">Delete</button>` : ''}
-                `;
-                schoolUserList.appendChild(li);
-            });
-            
-            document.querySelectorAll('.delete-user-btn').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const userIdToDelete = e.target.dataset.userId;
-                    try {
-                        const batch = db.runBatch();
-                        const devicesQuery = query(collection(db, "devices"), where("ownerId", "==", userIdToDelete));
-                        const devicesSnapshot = await getDocs(devicesQuery);
-                        devicesSnapshot.forEach(deviceDoc => {
-                            batch.delete(deviceDoc.ref);
-                        });
-                        batch.delete(doc(db, "users", userIdToDelete));
-                        await batch.commit();
-                    } catch (error) {
-                        console.error("Error deleting user:", error);
-                    }
-                });
-            });
-        }
-        
-        function renderSchoolDevices(devices) {
-            schoolDeviceList.innerHTML = '';
-            devices.forEach(device => {
-                const statusColor = device.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-white p-3 rounded-lg shadow-sm';
-                li.innerHTML = `
-                    <div class="flex-1 overflow-hidden">
-                        <p class="font-medium text-gray-800 truncate">${device.name}</p>
-                        <p class="text-sm text-gray-500 capitalize">ID: <span class="text-xs">${device.id}</span></p>
-                        <p class="text-sm text-gray-500 truncate">Owner: ${device.ownerId}</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="py-1 px-3 text-xs font-semibold rounded-full ${statusColor}">${device.status}</span>
-                        <select data-device-id="${device.id}" class="status-select p-1 text-sm border rounded-lg focus:outline-none">
-                            <option value="online" ${device.status === 'online' ? 'selected' : ''}>Online</option>
-                            <option value="offline" ${device.status === 'offline' ? 'selected' : ''}>Offline</option>
-                        </select>
-                        <button data-device-id="${device.id}" class="delete-device-btn py-1 px-3 text-sm bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors">Delete</button>
-                    </div>
-                `;
-                schoolDeviceList.appendChild(li);
-            });
-            
-            document.querySelectorAll('.status-select').forEach(select => {
-                select.addEventListener('change', async (e) => {
-                    const deviceId = e.target.dataset.deviceId;
-                    const newStatus = e.target.value;
-                    try {
-                        await updateDoc(doc(db, "devices", deviceId), { status: newStatus });
-                    } catch (error) {
-                        console.error("Error updating device status:", error);
-                    }
-                });
-            });
-            
-            document.querySelectorAll('.delete-device-btn').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const deviceIdToDelete = e.target.dataset.deviceId;
-                    try {
-                         const batch = db.runBatch();
-                         const usersQuery = query(collection(db, "users"), where("associatedDeviceIds", "array-contains", deviceIdToDelete));
-                         const usersSnapshot = await getDocs(usersQuery);
-                         const userDoc = usersSnapshot.docs[0];
-                         if (userDoc) {
-                             const newDeviceIds = userDoc.data().associatedDeviceIds.filter(id => id !== deviceIdToDelete);
-                             batch.update(userDoc.ref, { associatedDeviceIds: newDeviceIds });
-                         }
-                         batch.delete(doc(db, "devices", deviceIdToDelete));
-                         await batch.commit();
-                    } catch (error) {
-                        console.error("Error deleting device:", error);
-                    }
-                });
-            });
-        }
-        
-        function renderMyDevices(devices) {
-            myDeviceList.innerHTML = '';
-            if (devices.length === 0) {
-                myDeviceList.innerHTML = '<p class="text-gray-500">You have no devices registered.</p>';
-                return;
-            }
-            devices.forEach(device => {
-                const statusColor = device.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-white p-3 rounded-lg shadow-sm';
-                li.innerHTML = `
-                    <div class="flex-1 overflow-hidden">
-                        <p class="font-medium text-gray-800 truncate">${device.name}</p>
-                        <p class="text-sm text-gray-500 capitalize">ID: <span class="text-xs">${device.id}</span></p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="py-1 px-3 text-xs font-semibold rounded-full ${statusColor}">${device.status}</span>
-                    </div>
-                `;
-                myDeviceList.appendChild(li);
-            });
-        }
-
-    </script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
